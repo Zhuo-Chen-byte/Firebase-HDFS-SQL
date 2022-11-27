@@ -151,8 +151,6 @@ def command_list(dir):
             curr_dir.append(name_)
         return curr_dir
 
-    return 'No such directory, please try again'
-
 
 def command_cat(file_path):
     global DataNodeSize, numDataNodes, numPieces

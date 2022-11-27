@@ -2,7 +2,7 @@ import streamlit as st, pandas as pd, numpy as np, json, sys, requests, math, re
 from command_lines import *
 from MapReduce import *
 
-st.title('Navigation EDFS')
+st.title('Navigation through the EDFS')
 # start at root
 
 # return to root directory
@@ -35,9 +35,10 @@ if 'curr_path' not in st.session_state:
 
 "current path is: " + st.session_state.curr_path
 
-
-
 options = command_list(st.session_state.curr_path)
+if options == 'Nothing in this directory':
+    st.info('Nothing in this directory', icon="ℹ️")
+    st.stop()
 options = [''] + options
 
 children = pd.DataFrame(options, columns=['Name'])

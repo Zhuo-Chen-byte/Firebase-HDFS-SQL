@@ -114,7 +114,8 @@ def checkCondition(piecewise_, condition_):
         return re.match(pattern, piecewise_[att])
 
 # map function
-def mapPartition(partition_, conditions_, selected_attributes, groupbys):
+def mapPartition(partition_, conditions_, selected_attributes, groupbys, orderbys):
+
     intermediate_ = []
     
     for piecewise_ in partition_:
@@ -134,7 +135,7 @@ def mapPartition(partition_, conditions_, selected_attributes, groupbys):
         return {}
     
     combined = {}
-    
+   
     if groupbys:
         combined['count key'] = {}
         reduced = reduce(intermediate_, groupbys) # A dict group by key
@@ -145,7 +146,6 @@ def mapPartition(partition_, conditions_, selected_attributes, groupbys):
 
             for key in reduced:
                 kmp = reduced[key]
-                
                 for subkey in kmp:
                     combined['count key'][key] = len(kmp[subkey])
                     break
@@ -200,6 +200,13 @@ def mapPartition(partition_, conditions_, selected_attributes, groupbys):
                 
                 for piecewise_ in intermediate_:
                     combined[selected_attribute].append(piecewise_[selected_attribute])
+            
+        for orderby in orderbys:
+            if orderby not in combined:
+                combined[orderby] = []
+                
+                for piecewise_ in intermediate_:
+                    combined[orderby].append(piecewise_[orderby])
                     
                 
     return combined
@@ -244,7 +251,7 @@ def reducePartition(combined_partitions, groupbys):
                     reduced_[att] = min(reduced_[att], combined_partition[att])
                 else:
                     reduced_[att] += combined_partition[att]
-                    
+                
             count_ += combined_partition['count']
         
         # We use sum / len to calculate avg
@@ -282,10 +289,12 @@ def reducePartition(combined_partitions, groupbys):
                 for key in reduced_[grouped]:
                     sum_grouped = 'sum(' + grouped[4:-1] + ')'
                     reduced_[grouped][key] = round(reduced_[sum_grouped][key] / count_key[key], 3)
-                    
+        
+        reduced_['count key'] = count_key
+        
     return reduced_
 
-def output(reduced_, selected_attributes, groupbys, orderbys, offset, limit):
+def output(reduced_, selected_attributes, groupbys, orderbys, limit, offset, order):
     df = pd.DataFrame()
     
     if not groupbys:
@@ -296,6 +305,13 @@ def output(reduced_, selected_attributes, groupbys, orderbys, offset, limit):
                 df[selected_attribute] = [reduced_[selected_attribute]]
             else:
                 df[selected_attribute] = reduced_[selected_attribute]
+       
+        for orderby in orderbys:
+            if orderby not in df.columns:
+                if not isinstance(reduced_[orderby], list):
+                    df[orderby] = [reduced_[orderby]]
+                else:
+                    df[orderby] = reduced_[orderby]
     else:
         # Query out group by keys
         groupby_keys = list(reduced_['count key'].keys())
@@ -304,7 +320,6 @@ def output(reduced_, selected_attributes, groupbys, orderbys, offset, limit):
             groupby_keys[i] = list(groupby_keys[i])
 
         df = pd.DataFrame(columns=groupbys, data=groupby_keys)
-    
         
         for key in reduced_:
             if key == 'count' or key == 'count key' or not reduced_[key]:
@@ -317,28 +332,35 @@ def output(reduced_, selected_attributes, groupbys, orderbys, offset, limit):
             
             df[key] = dt_points
     
-    return df[selected_attributes].sort_values(by=orderbys).iloc[offset:].head(limit).reset_index(drop=True)
+  
+    if orderbys:
+        df = df.sort_values(by=orderbys, ascending=order)
+    
+    if limit < float('inf'):
+        df = df.head(limit)
+        
+    return df[selected_attributes].iloc[offset:].reset_index(drop=True)
     
 
-# command_put('winequality-red-v1.csv', '/usr/Females/Yifan', 5)
+#startDatabase()
+#command_put('winequality-red-v1.csv', '/usr/Males/John', 10)
 
 # p1 = command_readPartition('/usr/Males/John/winequality-red-v1.csv', 1)
-# # p3 = command_readPartition('/usr/Males/John/winequality-red-v1.csv', 3)
-# # print(p1)
-# # print(command_getPartitionLocations('/usr/Females/Yifan/winequality-red-v1.csv'))
-# # cod = ['quality > 6']
-# cod = []
-# # #att = ['quality', 'max(volatile acidity)', 'min(citric acid)', 'avg(alcohol)']
-# att = ['volatile acidity', 'citric acid', 'alcohol']
-# #gpbys = ['quality', 'chlorides']
-# # gpbys = []
-# # odbys = []
-# # odbys = ['volatile acidity']
-# offset = 0
-# limit = 100
-# #
-# #
-# mp1 = mapPartition(p1, cod, att, gpbys)
-# # mp3 = mapPartition(p3, cod, att, gpbys)
+# print(list(p1[0].keys()))
+# p10 = command_readPartition('/usr/Males/John/winequality-red-v1.csv', 10)
 #
-# print(output(mp1, att, gpbys, odbys, offset, limit))
+# cod = ['quality > 5']
+# att = ['quality', 'max(volatile acidity)', 'min(citric acid)', 'avg(alcohol)']
+# gpbys = ['quality', 'chlorides']
+# odbys = ['quality']
+# limit = 100
+# offset = 0
+#
+# mp1 = mapPartition(p1, [], ['*'], [], [])
+# print(mp1)
+# mp1 = mapPartition(p1, cod, att, gpbys, odbys)
+# mp10 = mapPartition(p10, cod, att, gpbys, odbys)
+# mpReduced = reducePartition([mp1, mp10], gpbys)
+# mpOutput = output(mpReduced, att, gpbys, odbys, 15, 1, False)
+#
+# print(mpOutput)
