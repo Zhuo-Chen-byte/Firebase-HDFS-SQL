@@ -10,7 +10,7 @@ queries = {"command":['select', 'from', 'where', 'group by', 'order by', 'offset
 #queries_df
 
 st.title('EDFS Search and Analysis')
-st.subheader('we support sql-like query')
+st.subheader('we support sql-like query (case sensitive)')
 st.text('supported clause: select, where, group by, order by, offset, limit, \n'
         'max(), min(), count(), sum(), avg()')
 st.text('query example: \n select quality, max(volatile acidity) from /usr/Males/John/winequality-red-v1.csv group by quality order by quality offset 1 limit 1')
@@ -239,10 +239,10 @@ if confirm_input:
     try:
         st.write(command_output(query))
     except:
-        st.error('Invalid query')
+        st.error('Invalid query',  icon="🚨")
 
 if see_partition_output:
     try:
         st.write(command_output(query, explanation=True))
     except:
-        st.error('Invalid query')
+        st.error('Invalid query',  icon="🚨")

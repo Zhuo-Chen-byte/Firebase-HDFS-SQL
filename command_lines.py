@@ -9,7 +9,15 @@ DataNodeSize = 1000
 numDataNodes = 10
 numPieces = 0
 
-def startDatabase():
+# Restart the database
+def startDatabase(DataNodeSize_, numDataNodes_):
+    r = requests.delete('https://dsci-551-group-project-default-rtdb.firebaseio.com/.json')
+    
+    existing_files = set()
+    DataNodeSize = DataNodeSize_
+    numDataNodes = numDataNodes_
+    numPieces = 0
+    
     for i in range(numDataNodes):
         r = requests.put(base_url + '/DataNodes/DataNode' + str(i) + '.json', json.dumps(''))
 

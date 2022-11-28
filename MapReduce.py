@@ -109,7 +109,7 @@ def checkCondition(piecewise_, condition_):
     
     elif 'regex' in condition_:
         att, pattern = condition_.split('regex')
-        pattern = val[1:len(val) - 1]
+        pattern = pattern[1:-2]
         
         return re.match(pattern, piecewise_[att])
 
