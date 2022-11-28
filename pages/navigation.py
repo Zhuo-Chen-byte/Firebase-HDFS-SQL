@@ -8,7 +8,10 @@ st.title('Navigation through the EDFS')
 # return to root directory
 back_to_root = st.button('Click here to return to root directory')
 if back_to_root:
-    st.session_state.curr_path = '/'
+    if st.session_state.curr_path == '/':
+        st.warning('you are already in root directory')
+    else:
+        st.session_state.curr_path = '/'
 
 # return to parent directory
 back_to_parent = st.button('Click here to return to parent directory')
@@ -33,8 +36,7 @@ def change_session_info_callback():
 if 'curr_path' not in st.session_state:
     st.session_state.curr_path = '/'
 
-"current path is: " + st.session_state.curr_path
-
+st.subheader('current path is: {}'.format(st.session_state.curr_path))
 options = command_list(st.session_state.curr_path)
 if options == 'Nothing in this directory':
     st.info('Nothing in this directory', icon="ℹ️")

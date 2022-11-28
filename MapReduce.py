@@ -115,7 +115,6 @@ def checkCondition(piecewise_, condition_):
 
 # map function
 def mapPartition(partition_, conditions_, selected_attributes, groupbys, orderbys):
-
     intermediate_ = []
     
     for piecewise_ in partition_:
@@ -146,6 +145,7 @@ def mapPartition(partition_, conditions_, selected_attributes, groupbys, orderby
 
             for key in reduced:
                 kmp = reduced[key]
+                
                 for subkey in kmp:
                     combined['count key'][key] = len(kmp[subkey])
                     break
@@ -207,8 +207,7 @@ def mapPartition(partition_, conditions_, selected_attributes, groupbys, orderby
                 
                 for piecewise_ in intermediate_:
                     combined[orderby].append(piecewise_[orderby])
-                    
-                
+        
     return combined
 
 
@@ -294,7 +293,7 @@ def reducePartition(combined_partitions, groupbys):
         
     return reduced_
 
-def output(reduced_, selected_attributes, groupbys, orderbys, limit, offset, order):
+def output(reduced_, selected_attributes, groupbys, orderbys, limit, offset):
     df = pd.DataFrame()
     
     if not groupbys:
@@ -334,33 +333,16 @@ def output(reduced_, selected_attributes, groupbys, orderbys, limit, offset, ord
     
   
     if orderbys:
-        df = df.sort_values(by=orderbys, ascending=order)
+        cols_ = list(orderbys.keys())
+        
+        for i in range(len(cols_) - 1, -1, -1):
+            if cols_[i] in df.columns:
+                df = df.sort_values(by=cols_[i], ascending=orderbys[cols_[i]])
+    
+    if offset < len(df):
+        df = df[selected_attributes].iloc[offset:]
     
     if limit < float('inf'):
         df = df.head(limit)
         
-    return df[selected_attributes].iloc[offset:].reset_index(drop=True)
-    
-
-#startDatabase()
-#command_put('winequality-red-v1.csv', '/usr/Males/John', 10)
-
-# p1 = command_readPartition('/usr/Males/John/winequality-red-v1.csv', 1)
-# print(list(p1[0].keys()))
-# p10 = command_readPartition('/usr/Males/John/winequality-red-v1.csv', 10)
-#
-# cod = ['quality > 5']
-# att = ['quality', 'max(volatile acidity)', 'min(citric acid)', 'avg(alcohol)']
-# gpbys = ['quality', 'chlorides']
-# odbys = ['quality']
-# limit = 100
-# offset = 0
-#
-# mp1 = mapPartition(p1, [], ['*'], [], [])
-# print(mp1)
-# mp1 = mapPartition(p1, cod, att, gpbys, odbys)
-# mp10 = mapPartition(p10, cod, att, gpbys, odbys)
-# mpReduced = reducePartition([mp1, mp10], gpbys)
-# mpOutput = output(mpReduced, att, gpbys, odbys, 15, 1, False)
-#
-# print(mpOutput)
+    return df.reset_index(drop=True)

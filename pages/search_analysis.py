@@ -13,13 +13,14 @@ st.title('EDFS Search and Analysis')
 st.subheader('we support sql-like query')
 st.text('supported clause: select, where, group by, order by, offset, limit, \n'
         'max(), min(), count(), sum(), avg()')
-st.text('query example: \n select quality, max(volatile acidity) from /usr/Males/John/winequality-red-v1.csv group by quality order by citric acid offset 1 limit 1')
+st.text('query example: \n select quality, max(volatile acidity) from /usr/Males/John/winequality-red-v1.csv group by quality order by quality offset 1 limit 1')
 query = st.text_input('Enter your query:', value="", placeholder = 'please enter sql query, like: select xxxx from xxx where xxx')
 
-confirm_input = st.button('click here to confirm query')
+confirm_input = st.button('click here to confirm query and get final output')
 see_partition_output = st.button('click here to get results from each partition')
 
-def command_output(query, see_partition = False):
+            
+def command_output(query, explanation=False):
     # try:
     nextKeyWords = queries['command'][1:]
 
@@ -112,8 +113,9 @@ def command_output(query, see_partition = False):
 
     # order by ***
     orderby_query = ''
-    orderbys = []
-
+    orderby_items = []
+    orderbys = {}
+    
     if 'order by' in query:
         query = query[query.find('order by') + 8:]
 
@@ -121,23 +123,27 @@ def command_output(query, see_partition = False):
             if nextKeyWord in query:
                 orderby_query = query[:query.find(nextKeyWord)]
                 break
-
+    
         if not orderby_query:
             orderby_query = query.strip()
-
-        orderbys = orderby_query.split(',')
-
-        for i in range(len(orderbys)):
-            orderbys[i] = orderbys[i].strip()
-
-    nextKeyWords = nextKeyWords[1:]
+        
+        orderby_items = orderby_query.split(',')
+        
+        for orderby_item in orderby_items:
+            if 'desc' in orderby_item:
+                orderbys[orderby_item[:orderby_item.find('desc')].strip()] = False
+            elif 'asc' in orderby_item:
+                orderbys[orderby_item[:orderby_item.find('asc')].strip()] = True
+            else:
+                orderbys[orderby_item.strip()] = True
 
     # limit ***
     limit_query = ''
     limit = float('inf')
 
     if 'limit' in query:
-        query = query[query.find('limit') + 5:]
+        query = query[query.find('limit') + 5
+                      :]
 
         for nextKeyWord in nextKeyWords:
             if nextKeyWord in query:
@@ -176,30 +182,67 @@ def command_output(query, see_partition = False):
     mapPartitions = []
 
     partitionNum = 1
+    
     for partition in partitions:
         if not conditions_or:
             mapPartitions.append(mapPartition(partition, [], selects, groupbys, orderbys))
-            if see_partition == True:
-                'output from partition', partitionNum, ':'
-                st.dataframe(mapPartition(partition, [], selects, groupbys, orderbys))
         else:
             for conditions in conditions_or:
                 mapPartitions.append(mapPartition(partition, conditions, selects, groupbys, orderbys))
-                if see_partition == True:
-                    'output from partition', partitionNum, ':'
-                    st.dataframe(mapPartition(partition, conditions, selects, groupbys, orderbys))
+        
         partitionNum += 1
 
     reduced_partitions = reducePartition(mapPartitions, groupbys)
-    output_ = output(reduced_partitions, selects, groupbys, orderbys, limit, offset, True)
+    output_ = output(reduced_partitions, selects, groupbys, orderbys, limit, offset)
+    
+    if explanation:
+        st.subheader('Original Partitions:')
+        
+        for i in range(len(partitions)):
+            'original partition', i + 1, ':'
+            st.dataframe(partitions[i])
+        
+        st.subheader('Mapped Partitions:')
+        
+        if not groupbys:
+            for i in range(len(mapPartitions)):
+                'mapped partition', i + 1, ':'
+                mapPartitions[i]
+        else:
+            for i in range(len(mapPartitions)):
+                'mapped partition', i + 1, ':'
+                
+                for key in mapPartitions[i]:
+                    if mapPartitions[i][key]:
+                        key
+                    
+                    for tuple_key in mapPartitions[i][key]:
+                        st.write(tuple(groupbys), '=', tuple_key, ' : ', key, '=', mapPartitions[i][key][tuple_key])
+        
+        st.subheader('Reduced:')
+        
+        if not groupbys:
+            reduced_partitions
+        else:
+            for key in reduced_partitions:
+                if reduced_partitions[key]:
+                    key
+                    
+                for tuple_key in reduced_partitions[key]:
+                    st.write(tuple(groupbys), '=', tuple_key, ' : ', key, '=', reduced_partitions[key][tuple_key])
+            
     st.subheader('Final Output:')
     return output_
-    # except Exception as e:
-    #     print(e.__traceback__)
-    #     st.error('Invalid query')
-        
+
+
 if confirm_input:
-    st.write(command_output(query, False))
+    try:
+        st.write(command_output(query))
+    except:
+        st.error('Invalid query')
 
 if see_partition_output:
-    st.write(command_output(query, True))
+    try:
+        st.write(command_output(query, explanation=True))
+    except:
+        st.error('Invalid query')

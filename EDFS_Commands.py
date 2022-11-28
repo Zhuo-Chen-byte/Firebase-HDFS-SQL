@@ -4,9 +4,9 @@ from MapReduce import *
 st.title('EDFS Commands')
 commands = {"command":['mkdir', 'ls', 'cat', 'rm', 'put', 'getPartitionLocations', 'readPartition'],
             "usage": ['create a directory', 'list contents of directory', 'display content of a specific file', 'delete a file', 'upload a file', ' locations of partitions of the file', 'the content of partition # of the specified file'],
-            "example": ['mkdir /user/john', 'ls /user', 'cat /user/john/hello.txt', 'rm /user/john/hello.txt', 'put(cars.csv, /user/john, number of partitions)', 'getPartitionLocations(/user/john/hello.txt)', 'readPartition(/user/john/hello.txt, partition#)']}
+            "example": ['mkdir /user/john', 'ls /user', 'cat /user/john/cars.csv', 'rm /user/john/cars.csv', 'put(cars.csv, /user/john, number of partitions)', 'getPartitionLocations(/user/john/hello.txt)', 'readPartition(/user/john/hello.txt, partition#)']}
 
-commands_df= pd.DataFrame(data = commands)
+commands_df = pd.DataFrame(data = commands)
 commands_df
 
 command = st.text_input('Enter your command', value="", placeholder = 'please enter command, mkdir /user/john')
@@ -16,7 +16,7 @@ confirm_input = st.button('click here to confirm command')
 def command_output(command):
     if command[:5] == 'mkdir':
         command_make_dir(command[6:])
-        return 'successfully make a directory'
+        st.success('successfully make a directory')
     elif command[:2] == 'ls':
         if command_list(command[3:]) != 'Nothing in this directory':
             return command_list(command[3:])
@@ -25,12 +25,16 @@ def command_output(command):
     elif command[:3] == 'cat':
         return command_cat(command[4:])
     elif command[:2] == 'rm':
-        return command_rm(command[3:])
+        rm_try =  command_rm(command[3:])
+        if rm_try == 'finished deleting':
+            st.success(rm_try)
     elif command[:3] == 'put':
         user_input = command[4:-1]
         user_input = user_input.replace(" ", "")
         user_input_sep = user_input.split(',')
-        return command_put(user_input_sep[0], user_input_sep[1], int(user_input_sep[2]))
+        put_try = command_put(user_input_sep[0], user_input_sep[1], int(user_input_sep[2]))
+        if put_try == 'successfully put a file':
+            st.success(put_try)
     elif command[:21] == 'getPartitionLocations':
         return command_getPartitionLocations(command[22:-1])
     elif command[:13] == 'readPartition':
@@ -43,4 +47,6 @@ def command_output(command):
         st.error('invalid command, please try again',  icon="🚨")
 
 if confirm_input:
-    st.write(command_output(command))
+    command_output_ui = command_output(command)
+    if command_output_ui:
+        st.write(command_output_ui)
