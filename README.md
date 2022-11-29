@@ -1,15 +1,18 @@
 # EDFS Simulation Database & SQL-like search and analysis web #
-1. Install this web supportives
+1. Download this project
 
-    You can clone the directory by running this command
+    You can clone this project by running this command
   
     ```shell
-    git clone https://github.com/yifanWangCoding/551project_git
+    git clone https://github.com/yifanWangCoding/551project_git.git
     ```
     
-    or down the .zip manually
-- To use this web, download the directory and run 
+    or download the .zip manually
+    
+2. Generate a web
     ```shell
     cd 551project_git
-    streamlit run EDFS.py
+    streamlit run EDFS_Commands.py
     ```
+    
+    and you can see the web
