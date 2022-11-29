@@ -3,8 +3,8 @@ from command_lines import *
 from MapReduce import *
 st.title('EDFS Commands (Case Sensitive)')
 commands = {"command":['restartDB', 'mkdir', 'ls', 'cat', 'rm', 'put', 'getPartitionLocations', 'readPartition'],
-            "usage": ['restart the database <size of a dataNode>, <the number of dataNodes>', 'create a directory', 'list contents of directory', 'display content of a specific file', 'delete a file', 'upload a file', ' locations of partitions of the file', 'the content of partition # of the specified file'],
-            "example": ['RestartDB 1000, 10', 'mkdir /user/john', 'ls /user', 'cat /user/john/cars.csv', 'rm /user/john/cars.csv', 'put(cars.csv, /user/john, number of partitions)', 'getPartitionLocations(/user/john/hello.txt)', 'readPartition(/user/john/hello.txt, partition#)']}
+            "usage": ['restart the database with <size of a dataNode> and <the number of dataNodes>', 'create a directory', 'list contents of directory', 'display content of a specific file', 'delete a file', 'upload a file', ' locations of partitions of the file', 'the content of partition # of the specified file'],
+            "example": ['restartDB 1000, 10', 'mkdir /user/john', 'ls /user', 'cat /user/john/cars.csv', 'rm /user/john/cars.csv', 'put(cars.csv, /user/john, number of partitions)', 'getPartitionLocations(/user/john/hello.txt)', 'readPartition(/user/john/hello.txt, partition#)']}
 
 commands_df = pd.DataFrame(data = commands)
 commands_df
