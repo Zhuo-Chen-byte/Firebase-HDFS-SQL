@@ -11,8 +11,7 @@
     
 2. Create your Firebase Realtime Database
     
-    And in *command_lines.py*, at line 6 change *base_url = 'https://dsci-551-group-project-default-rtdb.firebaseio.com'* to the link of your database
-    
+    And in *command_lines.py*, at line 6 change *base_url = 'https://dsci-551-group-project-default-rtdb.firebaseio.com'* to the link of yours
 
 3. Generate a web
     You can start up the command lines, navigation, and search & analysis web by running
