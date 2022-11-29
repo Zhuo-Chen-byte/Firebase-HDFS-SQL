@@ -185,7 +185,8 @@ def command_cat(file_path):
     
 def command_rm(filepath):
     global DataNodeSize, numDataNodes, numPieces
-
+    ori_filepath = filepath
+    
     filepath = filepath.replace('.', '_')
     url_ = base_url + '/root' + filepath + '.json'
     filename = filepath.split('/')[-1]
@@ -212,7 +213,11 @@ def command_rm(filepath):
         # Recover the dataNode (which is empty and thus deleted) after deleting all partitions under it
         if not requests.get(base_url + '/DataNodes/' + dataNodeName + '.json').json():
             restoreDataNode = requests.put(base_url + '/DataNodes/' + dataNodeName + '.json', json.dumps(''))
-        
+    try:
+        existing_files.remove(ori_filepath)
+    except:
+        pass
+    
     return 'finished deleting'
 
 def command_getPartitionLocations(file_path):
