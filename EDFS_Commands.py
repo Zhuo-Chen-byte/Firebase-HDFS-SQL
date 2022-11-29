@@ -16,7 +16,7 @@ confirm_input = st.button('click here to confirm command')
 def command_output(command):
     if command[:9] == 'restartDB':
         try:
-            command = command[command.find('w') + 9:].strip()
+            command = command[command.find('restartDB') + 9:].strip()
             size_, num_ = command.split(',')
             startDatabase(int(size_.strip()), int(num_.strip()))
             st.success('successfully restart the whole database')
