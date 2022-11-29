@@ -11,7 +11,7 @@ numPieces = 0
 
 # Restart the database
 def startDatabase(DataNodeSize_, numDataNodes_):
-    r = requests.delete('https://dsci-551-group-project-default-rtdb.firebaseio.com/.json')
+    r = requests.delete(base_url + '/.json')
     
     existing_files = set()
     DataNodeSize = DataNodeSize_
