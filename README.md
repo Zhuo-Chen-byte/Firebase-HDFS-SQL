@@ -4,7 +4,7 @@
     You can clone this project by running this command
   
     ```shell
-    git clone https://github.com/yifanWangCoding/551project_git.git
+    git clone https://github.com/Zhuo-Chen-byte/Firebase-HDFS-SQL.git
     ```
     
     or download the .zip manually
