@@ -17,7 +17,7 @@
     You can start up the command lines, navigation, and search & analysis web by running
     
     ```shell
-    cd 551project_git
+    cd Firebase-HDFS-SQL
     streamlit run EDFS_Commands.py
     ```
     
